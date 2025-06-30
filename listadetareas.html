@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Lista de Tareas Interactiva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .progress {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: white;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .input-section {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #taskInput:focus {
+            border-color: #4facfe;
+        }
+
+        #addBtn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #addBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .tasks-section {
+            padding: 20px 30px 30px;
+            min-height: 200px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            border-left-color: #28a745;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            margin-right: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .task-checkbox.completed {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .task-checkbox:hover {
+            border-color: #4facfe;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+            transition: all 0.2s ease;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        @media (max-width: 600px) {
+            .input-container {
+                flex-direction: column;
+            }
+
+            #addBtn {
+                width: 100%;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mi Lista de Tareas</h1>
+            <p>Organiza tu día de manera efectiva</p>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 de 0 tareas completadas</div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-container">
+                <input type="text" id="taskInput" placeholder="Escribe una nueva tarea...">
+                <button id="addBtn">Agregar</button>
+            </div>
+        </div>
+
+        <div class="tasks-section">
+            <div class="empty-state" id="emptyState">
+                <div class="icon">📝</div>
+                <p>No hay tareas aún. ¡Agrega tu primera tarea!</p>
+            </div>
+            <div id="tasksList"></div>
+        </div>
+    </div>
+
+    <script>
+        class TodoApp {
+            constructor() {
+                this.tasks = [];
+                this.taskInput = document.getElementById('taskInput');
+                this.addBtn = document.getElementById('addBtn');
+                this.tasksList = document.getElementById('tasksList');
+                this.emptyState = document.getElementById('emptyState');
+                this.progressBar = document.getElementById('progressBar');
+                this.progressText = document.getElementById('progressText');
+                
+                this.init();
+            }
+
+            init() {
+                // Event listeners
+                this.addBtn.addEventListener('click', () => this.addTask());
+                this.taskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.addTask();
+                    }
+                });
+
+                this.updateUI();
+            }
+
+            addTask() {
+                const taskText = this.taskInput.value.trim();
+                
+                if (taskText === '') {
+                    alert('Por favor, escribe una tarea');
+                    return;
+                }
+
+                const newTask = {
+                    id: Date.now(),
+                    text: taskText,
+                    completed: false
+                };
+
+                this.tasks.push(newTask);
+                this.taskInput.value = '';
+                this.updateUI();
+                
+                console.log('Nueva tarea agregada:', newTask);
+            }
+
+            toggleTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.updateUI();
+                    console.log('Tarea actualizada:', task);
+                }
+            }
+
+            deleteTask(taskId) {
+                this.tasks = this.tasks.filter(t => t.id !== taskId);
+                this.updateUI();
+                console.log('Tarea eliminada:', taskId);
+            }
+
+            updateUI() {
+                // Mostrar/ocultar estado vacío
+                if (this.tasks.length === 0) {
+                    this.emptyState.style.display = 'block';
+                    this.tasksList.style.display = 'none';
+                } else {
+                    this.emptyState.style.display = 'none';
+                    this.tasksList.style.display = 'block';
+                }
+
+                // Renderizar tareas
+                this.tasksList.innerHTML = '';
+                this.tasks.forEach(task => {
+                    const taskElement = this.createTaskElement(task);
+                    this.tasksList.appendChild(taskElement);
+                });
+
+                // Actualizar progreso
+                const completedTasks = this.tasks.filter(t => t.completed).length;
+                const totalTasks = this.tasks.length;
+                const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+                this.progressBar.style.width = progressPercentage + '%';
+                this.progressText.textContent = `${completedTasks} de ${totalTasks} tareas completadas`;
+            }
+
+            createTaskElement(task) {
+                const taskDiv = document.createElement('div');
+                taskDiv.className = `task-item ${task.completed ? 'completed' : ''}`;
+
+                taskDiv.innerHTML = `
+                    <div class="task-checkbox ${task.completed ? 'completed' : ''}" onclick="todoApp.toggleTask(${task.id})">
+                        ${task.completed ? '✓' : ''}
+                    </div>
+                    <span class="task-text ${task.completed ? 'completed' : ''}">${task.text}</span>
+                    <button class="delete-btn" onclick="todoApp.deleteTask(${task.id})">Eliminar</button>
+                `;
+
+                return taskDiv;
+            }
+        }
+
+        // Inicializar la aplicación cuando se carga la página
+        let todoApp;
+        document.addEventListener('DOMContentLoaded', () => {
+            todoApp = new TodoApp();
+        });
+    </script>
+</body>
+</html>
